@@ -5,8 +5,11 @@ const cells = [];
 let canvas;
 let bombs = 0;
 let stopped = false;
+
+const rows = 10;
+const cols = 10;
 function setup() {
-	canvas = createCanvas(800, 600);
+	canvas = createCanvas(rows * Cell.size, cols * Cell.size);
 	document.querySelector('#game').appendChild(canvas.elt);
 
 	for (let x = 0; x < width; x += Cell.size) {
@@ -18,10 +21,17 @@ function setup() {
 		}
 		cells.push(arr);
 	}
+
+	// Load images
+
+	// Bomb: https://image.spreadshirtmedia.net/image-server/v1/mp/designs/11510420,width=178,height=178/pixel-bomb-bombe-explosion.png
+	Cell.bombImg = loadImage('./bomb.png');
+	// Flag: https://pixelartmaker-data-78746291193.nyc3.digitaloceanspaces.com/image/25fdbd5620205f0.png
+	Cell.flagImg = loadImage('./flag.png');
 }
 
 function draw() {
-	background(200);
+	background(100);
 	for (const row of cells) {
 		for (const cell of row) {
 			const surrounding = getSurrounding(
@@ -32,13 +42,29 @@ function draw() {
 		}
 	}
 
-	stroke(0);
-	strokeWeight(2);
+	stroke(125);
+	strokeWeight(0.5);
 	for (let x = 0; x < width; x += Cell.size) {
 		line(x, 0, x, height);
 	}
 	for (let y = 0; y < height; y += Cell.size) {
 		line(0, y, width, y);
+	}
+
+	if (stopped) {
+		let fs = 0;
+		let bs = 0;
+		for (const row of cells) {
+			for (const cell of row) {
+				if (cell.flagged && cell.bomb) ++fs;
+				if (cell.bomb) ++bs;
+			}
+		}
+		const percent = Math.round(100 * (fs / bs));
+		document.querySelector(
+			'#instructions'
+		).innerHTML += `<br>Flagged ${percent}%`;
+		noLoop();
 	}
 }
 
@@ -50,16 +76,16 @@ function mousePressed(e) {
 			];
 		if (!cell) return;
 		if (cell.click()) {
-			console.log(
-				Math.floor(mouseX / Cell.size),
-				Math.floor(mouseY / Cell.size)
-			);
 			floodFill(
 				Math.floor(mouseX / Cell.size),
 				Math.floor(mouseY / Cell.size)
 			);
 		} else {
-			cell.shown = true;
+			if (cell.flagged) {
+				cell.flagged = false;
+			} else {
+				cell.shown = true;
+			}
 		}
 	} else if (mouseButton === RIGHT) {
 		const cell =
@@ -129,8 +155,6 @@ function checkWin() {
 		}
 	}
 	if (flags === bombs) {
-		// All flags done
-		noLoop();
 		stopped = true;
 		for (const row of cells) {
 			for (const cell of row) {

@@ -1,6 +1,19 @@
 const size = 50;
+
+const textColors = [
+	'#15ff00',
+	'#91f500',
+	'#c6ea00',
+	'#eedf00',
+	'#ffca00',
+	'#ffa800',
+	'#ff7b00',
+	'#ff0000',
+];
 class Cell {
 	static size = size;
+	static bombImg;
+	static flagImg;
 
 	/**
 	 * @param {Number} x
@@ -16,25 +29,25 @@ class Cell {
 	}
 
 	show(num) {
+		const imgPadding = 5;
 		this.surrounding = num;
 		if (this.shown) {
+			if (!stopped) {
+				this.flagged = false;
+			}
 			fill(200);
-			rect(this.x, this.y, size, size);
 			strokeWeight(1);
 			if (this.bomb) {
-				push();
-				ellipseMode(CENTER);
-				fill(150);
-				ellipse(
-					this.x + size / 2,
-					this.y + size / 2,
-					size / 2,
-					size / 2
+				image(
+					Cell.bombImg,
+					this.x + imgPadding,
+					this.y + imgPadding,
+					size - imgPadding * 2,
+					size - imgPadding * 2
 				);
-				pop();
 			} else if (num != 0) {
 				push();
-				fill(0);
+				fill(textColors[num - 1]);
 				textAlign(CENTER, CENTER);
 				strokeWeight(0);
 				textSize(16);
@@ -44,17 +57,17 @@ class Cell {
 				// no surrounding bombs
 			}
 		} else {
-			fill(255);
+			fill('#555');
 			rect(this.x, this.y, size, size);
 		}
 		if (this.flagged) {
-			push();
-			noStroke();
-			fill(255, 0, 0);
-			textAlign(CENTER, CENTER);
-			textSize(16);
-			text('#', this.x + size / 2, this.y + size / 2);
-			pop();
+			image(
+				Cell.flagImg,
+				this.x + imgPadding,
+				this.y + imgPadding,
+				size - imgPadding * 2,
+				size - imgPadding * 2
+			);
 		}
 	}
 
@@ -69,8 +82,7 @@ class Cell {
 					cell.shown = true;
 				}
 			}
-			noLoop();
-            stopped = true;
+			stopped = true;
 			return false;
 		}
 		if (getSurrounding(this.x / size, this.y / size) == 0) {
