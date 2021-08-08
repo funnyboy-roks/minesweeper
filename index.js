@@ -7,9 +7,14 @@ let bombs = 0;
 let stopped = false;
 
 const rows = 10;
-const cols = 10;
+const cols = 15;
+
+const selected = {
+	x: 0,
+	y: 0,
+};
 function setup() {
-	canvas = createCanvas(rows * Cell.size, cols * Cell.size);
+	canvas = createCanvas(cols * Cell.size, rows * Cell.size);
 	document.querySelector('#game').appendChild(canvas.elt);
 
 	for (let x = 0; x < width; x += Cell.size) {
@@ -32,6 +37,7 @@ function setup() {
 
 function draw() {
 	background(100);
+	cells[selected.x][selected.y].highlight = true;
 	for (const row of cells) {
 		for (const cell of row) {
 			const surrounding = getSurrounding(
@@ -106,6 +112,57 @@ function mousePressed(e) {
 			bombs == 1 ? '' : 's'
 		}<br>${flags} flag${flags == 1 ? '' : 's'}`;
 	}
+}
+
+function keyPressed(e) {
+	switch (keyCode) {
+		case LEFT_ARROW:
+			selected.x--;
+			selected.x = (cols + selected.x) % cols;
+			return;
+		case RIGHT_ARROW:
+			selected.x++;
+			selected.x = (cols + selected.x) % cols;
+			return;
+		case UP_ARROW:
+			selected.y--;
+			selected.y = (rows + selected.y) % rows;
+			return;
+		case DOWN_ARROW:
+			selected.y++;
+			selected.y = (rows + selected.y) % rows;
+			return;
+	}
+	const cell = cells[selected.x][selected.y];
+	switch (key) {
+		case 'f':
+			cell.flag();
+			break;
+		case ' ':
+			if (cell.click()) {
+				floodFill(selected.x, selected.y);
+			} else {
+				if (cell.flagged) {
+					cell.flagged = false;
+				} else {
+					cell.shown = true;
+				}
+			}
+			break;
+	}
+
+	let flags = 0;
+	for (const row of cells) {
+		for (const cell of row) {
+			if (cell.flagged) ++flags;
+		}
+	}
+	if (!stopped) {
+		document.querySelector('#instructions').innerHTML = `${bombs} bomb${
+			bombs == 1 ? '' : 's'
+		}<br>${flags} flag${flags == 1 ? '' : 's'}`;
+	}
+	console.log(keyCode);
 }
 
 function getSurrounding(x, y) {

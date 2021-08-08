@@ -26,6 +26,6 @@ body {
     text-align: center;
 }
 
-/* #game > * {
-    justify-content: center;
-} */
+.text {
+    display: inline-block;
+}

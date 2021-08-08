@@ -26,6 +26,7 @@ class Cell {
 		this.bomb = bomb;
 		this.shown = false;
 		this.flagged = false;
+		this.highlight = false;
 	}
 
 	show(num) {
@@ -69,6 +70,15 @@ class Cell {
 				size - imgPadding * 2
 			);
 		}
+		if(this.highlight) {
+			push();
+			stroke('#f00');
+			strokeWeight(2);
+			fill('#f002');
+			rect(this.x, this.y, size, size);
+			pop();
+		}
+		this.highlight = false;
 	}
 
 	click() {
