@@ -10,7 +10,7 @@ const rows = 10;
 const cols = 15;
 
 const selected = {
-	x: 0,
+	x: -1,
 	y: 0,
 };
 function setup() {
@@ -37,7 +37,9 @@ function setup() {
 
 function draw() {
 	background(100);
-	cells[selected.x][selected.y].highlight = true;
+	if (selected.x != -1) {
+		cells[selected.x][selected.y].highlight = true;
+	}
 	for (const row of cells) {
 		for (const cell of row) {
 			const surrounding = getSurrounding(
@@ -119,20 +121,29 @@ function keyPressed(e) {
 		case LEFT_ARROW:
 			selected.x--;
 			selected.x = (cols + selected.x) % cols;
-			return;
+			break;
 		case RIGHT_ARROW:
 			selected.x++;
 			selected.x = (cols + selected.x) % cols;
-			return;
+			break;
 		case UP_ARROW:
 			selected.y--;
 			selected.y = (rows + selected.y) % rows;
-			return;
+			break;
 		case DOWN_ARROW:
 			selected.y++;
 			selected.y = (rows + selected.y) % rows;
+			break;
+		case ESCAPE:
+			selected.x = -1;
+			selected.y = 0;
 			return;
 	}
+
+	if (selected.x == -1) {
+		selected.x = 0;
+	}
+
 	const cell = cells[selected.x][selected.y];
 	switch (key) {
 		case 'f':
